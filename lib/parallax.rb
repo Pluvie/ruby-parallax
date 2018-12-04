@@ -35,7 +35,7 @@ module Parallax
       end
       
       until collector.all_workers_terminated?
-        collector.collect
+        collector.receive
       end
       collector.close
       collector

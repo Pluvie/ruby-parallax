@@ -14,8 +14,12 @@ module Parallax
       @workers_data = []
     end
 
-    def collect
-      worker_index, method, *arguments = eval(@receiving_stream.gets.chomp)
+    def receive
+      self.collect @receiving_stream.gets.chomp
+    end
+
+    def collect(message)
+      worker_index, method, *arguments = eval(message)
       self.send method, worker_index, *arguments
     end
 
