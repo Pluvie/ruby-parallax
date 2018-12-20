@@ -1,7 +1,7 @@
 module Parallax
   module Collectable
 
-    self.included do |base|
+    def self.included(base)
       
       # @return [Integer] the number of workers running in parallel.
       attr_accessor :workers_count

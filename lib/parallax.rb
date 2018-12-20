@@ -1,12 +1,21 @@
 require 'active_support/core_ext/array'
 
 require 'parallax/version'
+require 'parallax/collectable'
 require 'parallax/collector'
 require 'parallax/worker'
 
 module Parallax
 
   class << self
+
+    ##
+    # Get the default number of workers.
+    #
+    # @return [Integer] the workers count.
+    def workers_count
+      Etc.nprocessors
+    end
   
     ##
     # Divides the given elements in groups of N and executes
@@ -17,10 +26,10 @@ module Parallax
     #
     # @return [Collector] all processes output collector.
     def execute(elements, options = {}, &block)
-      processes = options[:processes] || Etc.nprocessors
+      processes = options[:processes] || Parallax.workers_count
 
       if options[:collector].present?
-        collector = Object.const_get(options[:collector]).new(processes)
+        collector = options[:collector]
       else
         collector = Parallax::Collector.new(processes)
       end
