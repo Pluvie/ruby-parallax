@@ -19,7 +19,11 @@ module Parallax
     def execute(elements, options = {}, &block)
       processes = options[:processes] || Etc.nprocessors
 
-      collector = Parallax::Collector.new(processes)
+      if options[:collector].present?
+        collector = Object.const_get(options[:collector]).new(processes)
+      else
+        collector = Parallax::Collector.new(processes)
+      end
       elements_chunks = elements.in_groups(processes, false)
       processes.times do |worker_index|
         Process.fork do
