@@ -38,9 +38,8 @@ RSpec.describe Parallax do
 
       attr_accessor :name
       
-      def initialize(name, workers_count)
+      def initialize(name)
         @name = name
-        initialize_collector(workers_count)
       end
       
       def store(worker_index, object)
@@ -49,7 +48,7 @@ RSpec.describe Parallax do
     end
 
     numbers = (0..100).to_a
-    custom_collector = CustomCollector.new('Custom Collector', Parallax.workers_count)
+    custom_collector = CustomCollector.new('Custom Collector')
     Parallax.execute numbers, collector: custom_collector do |worker, numbers_chunk|
       numbers_chunk.each do |number|
         worker.store number * 2
