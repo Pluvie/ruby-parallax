@@ -1,36 +1,80 @@
 module Parallax
   class Worker
 
-    attr_accessor :receiver
+    # @return [Object] the collector object.
+    attr_accessor :collector
+    # @return [Integer] the index of this worker.
     attr_accessor :index
 
-    def initialize(receiver, index)
-      @receiver = receiver
+    ##
+    # Creates a new worker referred to the specified collector,
+    # and with the given index.
+    #
+    # @param [Collector] the collector.
+    # @param [Integer] the index.
+    #
+    # @return [Worker] the worker.
+    def initialize(collector, index)
+      @collector = collector
       @index = index
     end
 
+    ##
+    # Packs the message before sending it to the sending stream.
+    #
+    # @params [Array] args the message.
+    #
+    # @return [String] a string representation of the packed message.
     def pack(*args)
       [ self.index, *args ].inspect
     end
 
+    ##
+    # Sends the message to the sending stream.
+    #
+    # @params [Array] args the message.
+    #
+    # @return [nil]
     def send(*args)
-      @receiver.sending_stream.puts pack(*args)
+      @collector.sending_stream.puts pack(*args)
     end
 
+    ##
+    # Logs the message to the collector.
+    #
+    # @params [String] message the message.
+    #
+    # @return [nil]
     def log(message)
-      @receiver.sending_stream.puts pack(:log, message)
+      @collector.sending_stream.puts pack(:log, message)
     end
 
+    ##
+    # Stores the object in the collector.
+    #
+    # @param [Object] the object.
+    #
+    # @return [nil]
     def store(object)
-      @receiver.sending_stream.puts pack(:store, object)
+      @collector.sending_stream.puts pack(:store, object)
     end
 
+    ##
+    # Rescues an error from the worker and sends it to the collector.
+    #
+    # @param [Exception] error the error.
+    #
+    # @return [nil]
     def rescue(error)
-      @receiver.sending_stream.puts pack(:rescue, error.class, error.message)
+      @collector.sending_stream.puts pack(:rescue, error.class, error.message)
     end
 
+    ##
+    # Closes the worker and alerts the collector.
+    #
+    # @return [nil]
     def close
-      @receiver.sending_stream.puts pack(:close_worker)
+      @collector.sending_stream.puts pack(:close_worker)
     end
 
   end
