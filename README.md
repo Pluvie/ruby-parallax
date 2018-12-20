@@ -71,21 +71,21 @@ Other options you can pass to execute are:
 * `processes`: the number of processes in which parallelize the execution. Defaults to `Etc.nprocessors` (which is equal to the number of cores of the current running machine).
 * `collector`: a custom collector object that you can implement yourself.
 
-To use a custom collector, you need to `include Parallax::Collectable` in your custom collector, and initialize your collector by calling the included `initialize_collector` method.
-Example of a custom collector:
+To use a custom collector, you need to `include Parallax::Collectable` in your custom collector. Example of a custom collector:
 
 ```ruby
 # custom_collector.rb
 class CustomCollector
   include Parallax::Collectable
 
-  def initialize(worker_count, *args)
-    # Do your own initialization with *args, and then
-    initialize_collector(workers_count)
+  attr_accessor :name
+
+  def initialize(name)
+    @name = name
   end
 
   def store(worker_index, object)
-    workers_data.push [ "worker #{worker_index} stored: #{object.inspect}" ]
+    workers_data.push "#{self.name}: worker #{worker_index} stored: #{object}"
   end
 end
 ```
@@ -94,7 +94,7 @@ end
 workers_count = 4
 numbers = (0..100).to_a
 
-custom_collector = CustomCollector.new(workers_count)
+custom_collector = CustomCollector.new('custom_collector')
 Parallax.execute numbers, collector: custom_collector, do |worker, numbers_chunk|
   numbers_chunk.each do |number|
     worker.store number * 2
@@ -104,10 +104,10 @@ end
 puts custom_collector.workers_data.inspect
 
 # Example output with 4 cores and custom collector:
-#   [ ["worker 0 stored 0"],
-#     ["worker 3 stored 152"],
-#     ["worker 1 stored 52"],
-#     ["worker 2 stored 102"],
+#   [ "custom_collector: worker 0 stored 0",
+#     "custom_collector: worker 3 stored 152",
+#     "custom_collector: worker 1 stored 52",
+#     "custom_collector: worker 2 stored 102",
 #     ...
 ```
 

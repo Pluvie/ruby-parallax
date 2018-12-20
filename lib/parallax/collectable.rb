@@ -19,12 +19,13 @@ module Parallax
       #
       # @param [Integer] workers_count the number of workers running in parallel.
       #
-      # @return [nil]
+      # @return [Object] the instance of the including object.
       def initialize_collector(workers_count)
         @workers_count = workers_count
         @closed_workers_count = 0
         @receiving_stream, @sending_stream = IO.pipe
         @workers_data = []
+        self
       end
 
       ##
