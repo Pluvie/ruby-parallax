@@ -10,14 +10,6 @@ module Parallax
   class << self
 
     ##
-    # Get the default number of workers.
-    #
-    # @return [Integer] the workers count.
-    def workers_count
-      Etc.nprocessors
-    end
-  
-    ##
     # Divides the given elements in groups of N and executes
     # each chunk in parallel with the given block.
     #
@@ -26,10 +18,10 @@ module Parallax
     #
     # @return [Collector] all processes output collector.
     def execute(elements, options = {}, &block)
-      processes = options[:processes] || Parallax.workers_count
+      processes = options[:processes] || Etc.nprocessors
 
       if options[:collector].present?
-        collector = options[:collector]
+        collector = options[:collector].initialize_collector(processes)
       else
         collector = Parallax::Collector.new(processes)
       end
