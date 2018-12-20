@@ -28,7 +28,38 @@ RSpec.describe Parallax do
     end
 
     expected_result = numbers.map { |number| number * 2 }
-    expect(collector.workers_data.map(&:last).sort).to match expected_result
+    expect(collector.workers_data.map(&:last).sort).to eq expected_result
+  end
+
+  it "can use a custom collector" do
+
+    class CustomCollector
+      include Parallax::Collectable
+
+      attr_accessor :name
+      
+      def initialize(name, workers_count)
+        @name = name
+        initialize_collector(workers_count)
+      end
+      
+      def store(worker_index, object)
+        workers_data.push object
+      end
+    end
+
+    numbers = (0..100).to_a
+    custom_collector = CustomCollector.new('Custom Collector', Parallax.workers_count)
+    Parallax.execute numbers, collector: custom_collector do |worker, numbers_chunk|
+      numbers_chunk.each do |number|
+        worker.store number * 2
+      end
+    end
+
+    expected_result = numbers.map { |number| number * 2 }
+    expect(custom_collector.workers_data.sort).to eq expected_result
+    expect(custom_collector.name).to eq 'Custom Collector'
+
   end
 
 end

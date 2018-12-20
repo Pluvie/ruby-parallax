@@ -40,9 +40,13 @@ end
 #   [2] in
 ```
 
-If you need inter-process communication, this can be done by calling `worker.send` and passing a list of arguments. The args are serialized and passed via IO pipe to a `collector` object, which is by default an instance of `Parallax::Collector` class. The collector then parses the args and treats them like a method call where the first arg is the name of the method. In the example above, the collectors calls the `log` method which prints the second arg.
+If you need inter-process communication, this can be done by calling `worker.send` and passing a list of arguments. The args are serialized and passed via IO pipe to a `collector` object, which is by default an instance of `Parallax::Collector` class. The collector then parses the args and treats them like a method call where the first arg is the name of the method.
 
-The collector object is returned by the `Parallax.execute` method, so if you need to store each worker processed data you can use the `worker.store` method or implement it in your own custom collector. For example:
+There are a number of predefined methods, build on top of `worker.send` that you can call to do a number of tasks:
+* `log`: Used in the example above, the collectors calls the `log` method which prints the message to the stdout.
+* `store`: Saves the argument object into a variable called `workers_data` in the collector.
+
+The collector object is returned by the `Parallax.execute` method, so if you need to access the stored data called with the `worker.store` method you can do:
 
 ```ruby
 numbers = (0..100).to_a
@@ -65,12 +69,47 @@ puts collector.workers_data.inspect
 
 Other options you can pass to execute are:
 * `processes`: the number of processes in which parallelize the execution. Defaults to `Etc.nprocessors` (which is equal to the number of cores of the current running machine).
+* `collector`: a custom collector object that you can implement yourself.
 
-Methods available for a `worker` object, which are collected in the `collector` object:
-* `log(message)`: prints a message in stdout.
-* `store(object)`: stores an object with timestamp and worker index.
-* `rescue(error)`: rescues an error from a worker and raises the same error in the collector.
-* `close`: closes worker communication with the collector.
+To use a custom collector, you need to `include Parallax::Collectable` in your custom collector, and initialize your collector by calling the included `initialize_collector` method.
+Example of a custom collector:
+
+```ruby
+# custom_collector.rb
+class CustomCollector
+  include Parallax::Collectable
+
+  def initialize(worker_count, *args)
+    # Do your own initialization with *args, and then
+    initialize_collector(workers_count)
+  end
+
+  def store(worker_index, object)
+    workers_data.push [ "worker #{worker_index} stored: #{object.inspect}" ]
+  end
+end
+```
+
+```ruby
+workers_count = 4
+numbers = (0..100).to_a
+
+custom_collector = CustomCollector.new(workers_count)
+Parallax.execute numbers, collector: custom_collector, do |worker, numbers_chunk|
+  numbers_chunk.each do |number|
+    worker.store number * 2
+  end
+end
+
+puts custom_collector.workers_data.inspect
+
+# Example output with 4 cores and custom collector:
+#   [ ["worker 0 stored 0"],
+#     ["worker 3 stored 152"],
+#     ["worker 1 stored 52"],
+#     ["worker 2 stored 102"],
+#     ...
+```
 
 ## Development
 
