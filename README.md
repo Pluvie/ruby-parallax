@@ -42,7 +42,7 @@ end
 
 If you need inter-process communication, this can be done by calling `worker.send` and passing a list of arguments. The args are serialized and passed via IO pipe to a `collector` object, which is by default an instance of `Parallax::Collector` class. The collector then parses the args and treats them like a method call where the first arg is the name of the method.
 
-There are a number of predefined methods, build on top of `worker.send` that you can call to do a number of tasks:
+There are a number of predefined methods, built on top of `worker.send` that you can call to do a number of tasks:
 * `log`: Used in the example above, the collectors calls the `log` method which prints the message to the stdout.
 * `store`: Saves the argument object into a variable called `workers_data` in the collector.
 

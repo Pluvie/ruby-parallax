@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    parallax (0.3.1)
+    parallax (0.4.0)
       activesupport
+      msgpack
 
 GEM
   remote: https://rubygems.org/
@@ -70,6 +71,7 @@ GEM
     mini_mime (1.0.1)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
+    msgpack (1.2.4)
     nio4r (2.3.1)
     nokogiri (1.9.1)
       mini_portile2 (~> 2.4.0)

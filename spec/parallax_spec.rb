@@ -1,4 +1,5 @@
 require 'rainbow'
+require 'active_support/all'
 
 RSpec.describe Parallax do
   it "has a version number" do
@@ -28,6 +29,18 @@ RSpec.describe Parallax do
     end
 
     expected_result = numbers.map { |number| number * 2 }
+    expect(collector.workers_data.map(&:last).sort).to eq expected_result
+  end
+
+  it "stores workers output even as complex objects" do
+    dates = (15.days.ago.to_date..15.days.since.to_date).to_a
+    collector = Parallax.execute dates do |worker, dates_chunk|
+      dates_chunk.each do |date|
+        worker.store(date - 1.year)
+      end
+    end
+
+    expected_result = dates.map { |date| date - 1.year }
     expect(collector.workers_data.map(&:last).sort).to eq expected_result
   end
 
