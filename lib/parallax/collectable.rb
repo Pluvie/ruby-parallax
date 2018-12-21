@@ -33,7 +33,7 @@ module Parallax
       #
       # @return [String] the received data.
       def receive
-        self.collect @receiving_stream.gets.chomp
+        self.collect @receiving_stream.gets.chomp.gsub("\t", "\n")
       end
 
       ##
@@ -44,7 +44,7 @@ module Parallax
       #
       # @return [Object] the execution of the interpreted method.
       def collect(message)
-        worker_index, method, *arguments = eval(message)
+        worker_index, method, *arguments = YAML.load(message)
         self.send method, worker_index, *arguments
       end
 

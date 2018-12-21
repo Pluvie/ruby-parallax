@@ -1,3 +1,4 @@
+require 'yaml'
 require 'active_support/core_ext/array'
 
 require 'parallax/version'
