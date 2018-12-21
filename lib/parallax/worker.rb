@@ -26,7 +26,7 @@ module Parallax
     #
     # @return [String] a string representation of the packed message.
     def pack(*args)
-      [ self.index, *args ].inspect
+      [ self.index, *args ].to_yaml.gsub("\n", "\t")
     end
 
     ##
